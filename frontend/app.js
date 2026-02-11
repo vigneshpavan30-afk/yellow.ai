@@ -332,6 +332,12 @@ async function submitCSATFeedback(feedback) {
 
 // Add Message to Chat
 function addMessage(role, content) {
+    // Remove welcome message if exists
+    const welcomeMsg = chatMessages.querySelector('.welcome-message');
+    if (welcomeMsg) {
+        welcomeMsg.remove();
+    }
+    
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${role}`;
     
@@ -355,7 +361,14 @@ function addMessage(role, content) {
     messageDiv.appendChild(messageContent);
     
     chatMessages.appendChild(messageDiv);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+    
+    // Scroll to bottom with smooth behavior
+    setTimeout(() => {
+        chatMessages.scrollTo({
+            top: chatMessages.scrollHeight,
+            behavior: 'smooth'
+        });
+    }, 100);
 }
 
 // Set Input Disabled State
