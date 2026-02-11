@@ -85,23 +85,33 @@ export class BankingAgent {
         response = await this.handleLoanDetailsDisplayed(userMessage);
         break;
       default:
-        // Check if it's a loan/bank details request even in default state
+        // Always check for intent in any state to prevent loops
         const lowerMsg = userMessage.toLowerCase();
         const intentPhrases = [
           "loan details", "check my loan", "view loan", "show loan",
           "loan information", "my loan account", "bank details",
-          "check bank", "bank account", "account details", "check account"
+          "check bank", "bank account", "account details", "check account",
+          "i want to check", "i want to see", "show me"
         ];
         
         if (intentPhrases.some(phrase => lowerMsg.includes(phrase))) {
+          // Reset and start fresh
           this.intent = "view_loan_details";
           this.state = AGENT_CONFIG.states.INTENT_RECOGNIZED;
+          this.phoneNumber = null;
+          this.dob = null;
+          this.generatedOTP = null;
+          this.otpAttempts = 0;
+          this.selectedLoanAccountId = null;
+          
           response = {
             message: "I'll help you view your loan details. To proceed, I need to verify your identity. Please provide your registered phone number.",
             state: this.state,
             type: "text"
           };
         } else {
+          // Reset to idle if no clear intent
+          this.state = AGENT_CONFIG.states.IDLE;
           response = {
             message: "I'm here to help you with your loan details. You can say 'I want to check my loan details' or 'Show loan details' to get started.",
             state: this.state,
@@ -166,72 +176,35 @@ export class BankingAgent {
   }
 
   /**
-   * Handles idle state - detects intent using AI
+   * Handles idle state - detects intent using rule-based detection (fast, no AI)
    */
   async handleIdleState(message) {
-    try {
-      // Use rule-based detection for speed (loan details, bank details, account details all mean the same)
-      const lowerMessage = message.toLowerCase();
-      const intentPhrases = [
-        "loan details",
-        "check my loan",
-        "view loan",
-        "show loan",
-        "loan information",
-        "my loan account",
-        "bank details",
-        "check bank",
-        "bank account",
-        "account details",
-        "check account"
-      ];
+    // Use rule-based detection for speed (loan details, bank details, account details all mean the same)
+    const lowerMessage = message.toLowerCase();
+    const intentPhrases = [
+      "loan details", "check my loan", "view loan", "show loan",
+      "loan information", "my loan account", "bank details",
+      "check bank", "bank account", "account details", "check account",
+      "i want to check", "i want to see", "show me"
+    ];
 
-      if (intentPhrases.some(phrase => lowerMessage.includes(phrase))) {
-        this.intent = "view_loan_details";
-        this.state = AGENT_CONFIG.states.INTENT_RECOGNIZED;
-        
-        return {
-          message: "I'll help you view your loan details. To proceed, I need to verify your identity. Please provide your registered phone number.",
-          state: this.state,
-          type: "text"
-        };
-      }
+    if (intentPhrases.some(phrase => lowerMessage.includes(phrase))) {
+      this.intent = "view_loan_details";
+      this.state = AGENT_CONFIG.states.INTENT_RECOGNIZED;
       
-      // For other intents, provide helpful guidance
       return {
-        message: "I'm here to help you with your loan details. You can say 'I want to check my loan details' or 'Show loan details' to get started.",
-        state: this.state,
-        type: "text"
-      };
-    } catch (error) {
-      console.error('AI intent detection error, using fallback:', error);
-      // Fallback to rule-based detection
-      const lowerMessage = message.toLowerCase();
-      const intentPhrases = [
-        "loan details",
-        "check my loan",
-        "view loan",
-        "show loan",
-        "loan information",
-        "my loan account"
-      ];
-
-      if (intentPhrases.some(phrase => lowerMessage.includes(phrase))) {
-        this.intent = "view_loan_details";
-        this.state = AGENT_CONFIG.states.INTENT_RECOGNIZED;
-        return {
-          message: "I'll help you view your loan details. To proceed, I need to verify your identity. Please provide your registered phone number.",
-          state: this.state,
-          type: "text"
-        };
-      }
-
-      return {
-        message: "I'm here to help you with your loan details. You can say 'I want to check my loan details' or 'Show loan details' to get started.",
+        message: "I'll help you view your loan details. To proceed, I need to verify your identity. Please provide your registered phone number.",
         state: this.state,
         type: "text"
       };
     }
+    
+    // For other intents, provide helpful guidance
+    return {
+      message: "I'm here to help you with your loan details. You can say 'I want to check my loan details' or 'Show loan details' to get started.",
+      state: this.state,
+      type: "text"
+    };
   }
 
   /**
