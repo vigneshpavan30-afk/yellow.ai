@@ -466,6 +466,21 @@ export class BankingAgent {
       };
     }
     
+    // Check for explicit "BACK_TO_ACCOUNTS" message from quick reply button
+    if (message === "BACK_TO_ACCOUNTS") {
+      // Reset selected account and show loan accounts again
+      this.selectedLoanAccountId = null;
+      return await this.triggerLoanAccountsWorkflow();
+    }
+    
+    // Check for explicit "BACK_TO_ACCOUNTS" message from quick reply button
+    if (message === "BACK_TO_ACCOUNTS" || message === "back_to_accounts") {
+      // Reset selected account and show loan accounts again
+      this.selectedLoanAccountId = null;
+      this.state = AGENT_CONFIG.states.LOAN_ACCOUNTS_DISPLAYED;
+      return await this.triggerLoanAccountsWorkflow();
+    }
+    
     // Check for requests to view another loan account
     const anotherAccountPhrases = [
       "another account",
@@ -483,6 +498,7 @@ export class BankingAgent {
     if (anotherAccountPhrases.some(phrase => lowerMessage.includes(phrase))) {
       // Reset selected account and show loan accounts again
       this.selectedLoanAccountId = null;
+      this.state = AGENT_CONFIG.states.LOAN_ACCOUNTS_DISPLAYED;
       return await this.triggerLoanAccountsWorkflow();
     }
     
