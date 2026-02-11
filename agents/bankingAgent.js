@@ -455,7 +455,10 @@ export class BankingAgent {
    * Handles loan details displayed state
    */
   async handleLoanDetailsDisplayed(message) {
-    if (message === "CSAT_SURVEY_TRIGGER" || message.toLowerCase().includes("rate")) {
+    const lowerMessage = message.toLowerCase();
+    
+    // Check for CSAT survey request
+    if (message === "CSAT_SURVEY_TRIGGER" || lowerMessage.includes("rate")) {
       this.state = AGENT_CONFIG.states.CSAT_SURVEY;
       return {
         message: "Thank you for using our service! Please rate your experience.",
@@ -465,8 +468,30 @@ export class BankingAgent {
       };
     }
     
-    if (message === "BACK_TO_ACCOUNTS" || message.toLowerCase().includes("another account")) {
+    // Check for requests to view another loan account
+    const anotherAccountPhrases = [
+      "another account",
+      "another loan",
+      "view another",
+      "see another",
+      "different account",
+      "different loan",
+      "show accounts",
+      "list accounts",
+      "all accounts",
+      "back to accounts"
+    ];
+    
+    if (anotherAccountPhrases.some(phrase => lowerMessage.includes(phrase))) {
+      // Reset selected account and show loan accounts again
+      this.selectedLoanAccountId = null;
       return await this.triggerLoanAccountsWorkflow();
+    }
+    
+    // Check if user provided a loan account ID directly
+    const accountId = this.extractLoanAccountId(message);
+    if (accountId) {
+      return await this.handleLoanAccountSelection(message);
     }
     
     return {
