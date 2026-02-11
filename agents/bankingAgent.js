@@ -152,25 +152,26 @@ export class BankingAgent {
    */
   async handleIdleState(message) {
     try {
-      // Use AI to detect intent (with timeout)
-      let detectedIntent;
-      try {
-        detectedIntent = await Promise.race([
-          detectIntent(message, this.conversationHistory),
-          new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Intent detection timeout')), 2000)
-          )
-        ]);
-      } catch (error) {
-        // Silently fallback to rule-based detection for speed
-        detectedIntent = null;
-      }
-      
-      if (detectedIntent === 'view_loan_details') {
+      // Use rule-based detection for speed (loan details, bank details, account details all mean the same)
+      const lowerMessage = message.toLowerCase();
+      const intentPhrases = [
+        "loan details",
+        "check my loan",
+        "view loan",
+        "show loan",
+        "loan information",
+        "my loan account",
+        "bank details",
+        "check bank",
+        "bank account",
+        "account details",
+        "check account"
+      ];
+
+      if (intentPhrases.some(phrase => lowerMessage.includes(phrase))) {
         this.intent = "view_loan_details";
         this.state = AGENT_CONFIG.states.INTENT_RECOGNIZED;
         
-        // Use standard response for speed (skip AI for common flows)
         return {
           message: "I'll help you view your loan details. To proceed, I need to verify your identity. Please provide your registered phone number.",
           state: this.state,
@@ -178,24 +179,11 @@ export class BankingAgent {
         };
       }
       
-      // For other intents or no intent, generate a helpful response
-      const context = {
-        state: this.state,
-        availableActions: ['view_loan_details']
-      };
-      
-      const aiResponse = await generateStructuredResponse(
-        SYSTEM_PROMPT,
-        this.conversationHistory,
-        message,
-        context
-      );
-      
+      // For other intents, provide helpful guidance
       return {
-        message: aiResponse.message || "I'm here to help you with your loan details. You can say 'I want to check my loan details' or 'Show loan details' to get started.",
+        message: "I'm here to help you with your loan details. You can say 'I want to check my loan details' or 'Show loan details' to get started.",
         state: this.state,
-        type: "text",
-        aiGenerated: true
+        type: "text"
       };
     } catch (error) {
       console.error('AI intent detection error, using fallback:', error);
@@ -241,6 +229,25 @@ export class BankingAgent {
    * Handles phone number collection (optimized for speed)
    */
   async handlePhoneCollection(message) {
+    // Check if user is trying to restart or change intent
+    const lowerMessage = message.toLowerCase();
+    const intentPhrases = [
+      "loan details", "check my loan", "view loan", "show loan",
+      "loan information", "my loan account", "bank details",
+      "check bank", "bank account", "account details", "check account"
+    ];
+    
+    // If user is requesting loan details again, restart the flow
+    if (intentPhrases.some(phrase => lowerMessage.includes(phrase))) {
+      this.intent = "view_loan_details";
+      this.state = AGENT_CONFIG.states.COLLECTING_PHONE;
+      return {
+        message: "I'll help you view your loan details. To proceed, I need to verify your identity. Please provide your registered phone number.",
+        state: this.state,
+        type: "text"
+      };
+    }
+    
     // Use regex extraction first (instant, no AI call)
     const phoneNumber = this.extractPhoneNumber(message);
     
