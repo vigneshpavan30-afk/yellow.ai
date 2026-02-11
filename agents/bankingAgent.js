@@ -85,11 +85,29 @@ export class BankingAgent {
         response = await this.handleLoanDetailsDisplayed(userMessage);
         break;
       default:
-        response = {
-          message: "I'm here to help you with your loan details. How can I assist you?",
-          state: this.state,
-          type: "text"
-        };
+        // Check if it's a loan/bank details request even in default state
+        const lowerMsg = userMessage.toLowerCase();
+        const intentPhrases = [
+          "loan details", "check my loan", "view loan", "show loan",
+          "loan information", "my loan account", "bank details",
+          "check bank", "bank account", "account details", "check account"
+        ];
+        
+        if (intentPhrases.some(phrase => lowerMsg.includes(phrase))) {
+          this.intent = "view_loan_details";
+          this.state = AGENT_CONFIG.states.INTENT_RECOGNIZED;
+          response = {
+            message: "I'll help you view your loan details. To proceed, I need to verify your identity. Please provide your registered phone number.",
+            state: this.state,
+            type: "text"
+          };
+        } else {
+          response = {
+            message: "I'm here to help you with your loan details. You can say 'I want to check my loan details' or 'Show loan details' to get started.",
+            state: this.state,
+            type: "text"
+          };
+        }
     }
 
     // Add agent response to history
