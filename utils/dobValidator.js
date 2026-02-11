@@ -17,11 +17,20 @@ export function validateDOB(dobString) {
     };
   }
 
-  // Check format: DD/MM/YYYY
-  const dobPattern = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
+  // Check format: DD/MM/YYYY (strict - must be 2 digits for day and month, 4 digits for year)
+  const dobPattern = /^(\d{2})\/(\d{2})\/(\d{4})$/;
   const match = dobString.trim().match(dobPattern);
   
   if (!match) {
+    // Check if it's close but wrong format
+    const loosePattern = /^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/;
+    if (loosePattern.test(dobString.trim())) {
+      return {
+        valid: false,
+        error: 'Invalid format. Please use DD/MM/YYYY format with 2 digits for day, 2 digits for month, and 4 digits for year (e.g., 22/02/2004, not 22/2/04)',
+        date: null
+      };
+    }
     return {
       valid: false,
       error: 'Invalid format. Please use DD/MM/YYYY format (e.g., 15/06/1990)',
@@ -126,45 +135,45 @@ export function validateDOB(dobString) {
  * @returns {Object} - { valid: boolean, dob: string|null, error: string|null }
  */
 export function extractAndValidateDOB(message) {
-  // Try to extract date pattern DD/MM/YYYY or DD-MM-YYYY
-  const datePatterns = [
-    /(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/,  // DD/MM/YYYY or DD-MM-YYYY
-    /(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2})/   // DD/MM/YY (convert to YYYY)
-  ];
-
-  for (const pattern of datePatterns) {
-    const match = message.match(pattern);
-    if (match) {
-      let day = match[1];
-      let month = match[2];
-      let year = match[3];
-
-      // Convert 2-digit year to 4-digit
-      if (year.length === 2) {
-        const currentYear = new Date().getFullYear();
-        const currentCentury = Math.floor(currentYear / 100) * 100;
-        const yearNum = parseInt(year, 10);
-        // If year is > 50, assume 1900s, else 2000s
-        year = yearNum > 50 ? currentCentury - 100 + yearNum : currentCentury + yearNum;
-      }
-
-      const dobString = `${day}/${month}/${year}`;
-      const validation = validateDOB(dobString);
-      
-      if (validation.valid) {
-        return {
-          valid: true,
-          dob: validation.formatted,
-          error: null
-        };
-      } else {
-        return {
-          valid: false,
-          dob: null,
-          error: validation.error
-        };
-      }
+  // Extract date pattern - prefer strict DD/MM/YYYY format
+  // First try strict format (2 digits, 2 digits, 4 digits)
+  const strictPattern = /(\d{2})[\/\-](\d{2})[\/\-](\d{4})/;
+  let match = message.match(strictPattern);
+  
+  if (match) {
+    let day = match[1];
+    let month = match[2];
+    let year = match[3];
+    
+    const dobString = `${day}/${month}/${year}`;
+    const validation = validateDOB(dobString);
+    
+    if (validation.valid) {
+      return {
+        valid: true,
+        dob: validation.formatted,
+        error: null
+      };
+    } else {
+      return {
+        valid: false,
+        dob: null,
+        error: validation.error
+      };
     }
+  }
+  
+  // If strict format not found, check for loose format and reject with helpful error
+  const loosePattern = /(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/;
+  match = message.match(loosePattern);
+  
+  if (match) {
+    // Found date but wrong format - provide specific error
+    return {
+      valid: false,
+      dob: null,
+      error: 'Invalid format. Please use DD/MM/YYYY format with 2 digits for day, 2 digits for month, and 4 digits for year (e.g., 22/02/2004, not 22/2/04)'
+    };
   }
 
   return {
