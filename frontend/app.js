@@ -1,6 +1,7 @@
 // Yellow Bank Banking Agent - Frontend Application
 
-const API_BASE_URL = 'http://localhost:3000';
+// Auto-detect API base URL (works for both localhost and deployed)
+const API_BASE_URL = window.location.origin;
 let sessionId = null;
 let isWaitingForResponse = false;
 

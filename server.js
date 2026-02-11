@@ -12,7 +12,13 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(cors());
+// CORS configuration - allow all origins for deployed version
+app.use(cors({
+  origin: '*', // Allow all origins (for deployed version)
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'X-Session-Id'],
+  credentials: false
+}));
 app.use(express.json());
 
 // Serve static files from frontend directory
