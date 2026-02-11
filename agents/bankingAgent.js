@@ -152,14 +152,17 @@ export class BankingAgent {
    */
   async handleIdleState(message) {
     try {
-      // Use AI to detect intent
+      // Use AI to detect intent (with timeout)
       let detectedIntent;
       try {
-        console.log('🤖 Attempting AI intent detection...');
-        detectedIntent = await detectIntent(message, this.conversationHistory);
-        console.log('🤖 AI detected intent:', detectedIntent);
+        detectedIntent = await Promise.race([
+          detectIntent(message, this.conversationHistory),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Intent detection timeout')), 2000)
+          )
+        ]);
       } catch (error) {
-        console.log('⚠️  AI intent detection failed, using fallback:', error.message);
+        // Silently fallback to rule-based detection for speed
         detectedIntent = null;
       }
       
@@ -167,40 +170,12 @@ export class BankingAgent {
         this.intent = "view_loan_details";
         this.state = AGENT_CONFIG.states.INTENT_RECOGNIZED;
         
-        // Generate AI-powered response
-        try {
-          console.log('🤖 Generating AI response...');
-          const context = {
-            state: this.state,
-            intent: this.intent,
-            availableActions: ['collect_phone_number']
-          };
-          
-          const aiResponse = await generateStructuredResponse(
-            SYSTEM_PROMPT,
-            this.conversationHistory,
-            message,
-            context
-          );
-          
-          console.log('🤖 AI response generated:', aiResponse.aiGenerated ? 'YES' : 'NO');
-          
-          // Ensure the response includes the phone number request
-          let responseMessage = aiResponse.message;
-          if (!responseMessage.toLowerCase().includes('phone')) {
-            responseMessage = "I'll help you view your loan details. To proceed, I need to verify your identity. Please provide your registered phone number.";
-          }
-          
-          return {
-            message: responseMessage,
-            state: this.state,
-            type: "text",
-            aiGenerated: aiResponse.aiGenerated || false
-          };
-        } catch (error) {
-          console.log('⚠️  AI response generation failed, using fallback:', error.message);
-          // Fall through to default response
-        }
+        // Use standard response for speed (skip AI for common flows)
+        return {
+          message: "I'll help you view your loan details. To proceed, I need to verify your identity. Please provide your registered phone number.",
+          state: this.state,
+          type: "text"
+        };
       }
       
       // For other intents or no intent, generate a helpful response

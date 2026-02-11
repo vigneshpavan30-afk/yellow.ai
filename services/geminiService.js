@@ -80,7 +80,7 @@ export async function generateAIResponse(systemPrompt, conversationHistory, user
     const result = await Promise.race([
       model.generateContent(prompt),
       new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('AI request timeout')), 5000)
+        setTimeout(() => reject(new Error('AI request timeout')), 3000)
       )
     ]);
     
