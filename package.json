@@ -1,0 +1,28 @@
+{
+  "name": "yellow-bank-agent",
+  "version": "1.0.0",
+  "description": "Gen AI Banking Agent for Yellow Bank - Loan Details System",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node test-complete-flow.js",
+    "test:ai": "node test-ai-integration.js",
+    "test:csat": "node test-csat.js",
+    "test:quick": "node quick-test.js"
+  },
+  "keywords": [
+    "banking",
+    "agent",
+    "ai",
+    "loan"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "@google/generative-ai": "^0.21.0"
+  }
+}
