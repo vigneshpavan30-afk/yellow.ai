@@ -1,4 +1,4 @@
-// Yellow Bank Banking Agent - Frontend Application
+// pavan Vignesh Yellow Bank Agent - Frontend Application
 
 // Auto-detect API base URL (works for both localhost and deployed)
 const API_BASE_URL = window.location.origin;

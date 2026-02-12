@@ -190,7 +190,7 @@ app.post('/api/session/:sessionId/reset', (req, res) => {
 app.get('/health', (req, res) => {
   res.json({
     status: 'healthy',
-    service: 'Yellow Bank Banking Agent',
+    service: 'pavan Vignesh Yellow Bank Agent',
     timestamp: new Date().toISOString()
   });
 });
@@ -200,7 +200,7 @@ app.get('/health', (req, res) => {
  */
 app.get('/api', (req, res) => {
   res.json({
-    name: "Yellow Bank Banking Agent API",
+    name: "pavan Vignesh Yellow Bank Agent API",
     version: "1.0.0",
     endpoints: {
       "POST /api/chat": "Main chat endpoint for banking agent conversations",
@@ -228,7 +228,7 @@ app.get('/api', (req, res) => {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`🚀 Yellow Bank Banking Agent server running on port ${PORT}`);
+  console.log(`🚀 pavan Vignesh Yellow Bank Agent server running on port ${PORT}`);
   console.log(`📖 API Documentation: http://localhost:${PORT}/api`);
   console.log(`❤️  Health Check: http://localhost:${PORT}/health`);
 });

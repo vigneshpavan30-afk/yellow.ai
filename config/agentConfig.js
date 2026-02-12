@@ -3,7 +3,7 @@
  */
 
 export const AGENT_CONFIG = {
-  name: "Yellow Bank Banking Agent",
+  name: "pavan Vignesh Yellow Bank Agent",
   language: "en",
   maxOTPAttempts: 3,
   supportedOTPs: ["1234", "5678", "7889", "1209"],

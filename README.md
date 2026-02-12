@@ -1,6 +1,6 @@
-# Yellow Bank Banking Agent
+# pavan Vignesh Yellow Bank Agent
 
-A Gen AI Banking Agent system for Yellow Bank that handles loan details inquiries with secure authentication, multi-step workflows, and Dynamic Rich Media (DRM) interactions.
+A Gen AI Banking Agent system (pavan Vignesh Yellow Bank Agent) for Yellow Bank that handles loan details inquiries with secure authentication, multi-step workflows, and Dynamic Rich Media (DRM) interactions.
 
 ## Features
 
